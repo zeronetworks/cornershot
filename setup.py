@@ -15,7 +15,7 @@ with open(path.join(SCRIPT_DIR, 'requirements.txt'), encoding='utf-8') as f:
 setup(
     name='cornershot',
     python_requires='>=3',
-    version='0.0.1',
+    version='0.0.3',
     description='Library to test network connectivity',
     long_description=long_description,
     url='https://github.com/zeronetworks/cornershot',
@@ -35,7 +35,7 @@ setup(
         'Programming Language :: Python :: 3.8',
     ],
     keywords='cornershot zerotrust ztna zeronetworks network scanner networkscanner',
-    packages=['cornershot'],
+    packages=['cornershot', 'cornershot.shots'],
     install_requires=dependencies,
     extras_require={
         'dev': ['check-manifest'],
