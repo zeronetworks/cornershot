@@ -1,11 +1,15 @@
 from argparse import ArgumentParser
-
+import re
+from ipaddress import ip_network, AddressValueError, NetmaskValueError, summarize_address_range, ip_address
 from .cornershot import CornerShot
 from . import logger
 import logging
 
 DEFAULT_NUM_THREADS = 200
 DEFAULT_TARGET_PORTS = [135, 445, 3389, 5985, 5986]
+
+INVALID_SUBNET_ERROR_MESSAGE = f"please pick a valid comma delimited list of ip subnet or range such as '192.168.10.0/24,10.9.0.0-10.9.0.255'"
+INVALID_PORTS_ERROR_MESSAGE = f"please pick a valid comma delimited list of port ranges, or list of ports"
 
 def parse_args():
     parser = ArgumentParser(prog="CornerShot", prefix_chars="-/", add_help=False, description=f'Corner Shooter')
@@ -24,14 +28,69 @@ def parse_args():
     return args
 
 def set_logger():
-    logger.setLevel(logging.INFO)
+    logger.setLevel(logging.DEBUG)
     console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.INFO)
+    console_handler.setLevel(logging.DEBUG)
 
     console_formatter = logging.Formatter('%(message)s')
     console_handler.setFormatter(console_formatter)
     logger.addHandler(console_handler)
 
+def parse_ip_ranges(ip_ranges):
+        add_list = []
+        try:
+            if ip_ranges:
+                if ',' in ip_ranges:
+                    ip_ranges = ip_ranges.split(',')
+                else:
+                    ip_ranges = [ip_ranges]
+
+                for address in ip_ranges:
+                    if '-' in address:
+                        first_addr = ip_address(address.split('-')[0])
+                        last_addr = ip_address(address.split('-')[1])
+                        for ipnet in summarize_address_range(first_addr, last_addr):
+                            add_list += [ipad.exploded for ipad in ipnet.hosts()]
+                    elif '/' in address:
+                        add_list += [ipad.exploded for ipad in ip_network(address, strict=False).hosts()]
+                    else:
+                        add_list.append(address)
+
+        except (AddressValueError, NetmaskValueError, ValueError):
+            raise ValueError(INVALID_SUBNET_ERROR_MESSAGE)
+
+        return add_list
+
+def parse_port_ranges(ranges):
+        port_ranges = []
+
+        if type(ranges) is list:
+            if all(isinstance(x, int) and (0 < x < 65536) for x in ranges):
+                return ranges
+            else:
+                raise ValueError(INVALID_PORTS_ERROR_MESSAGE)
+
+        if ranges:
+            if ',' in ranges:
+                ranges = ranges.split(',')
+            else:
+                ranges = [ranges]
+
+            for port_range in ranges:
+                res = re.findall(r"(\d+)-?(\d*)", port_range)
+                if res:
+                    pstart = int(res[0][0])
+                    pend = None if not res[0][1] else int(res[0][1])
+                    if pend:
+                        port_ranges += [p for p in range(pstart, pend)]
+                    else:
+                        port_ranges.append(pstart)
+                else:
+                    raise ValueError(INVALID_PORTS_ERROR_MESSAGE)
+        else:
+            raise ValueError(INVALID_PORTS_ERROR_MESSAGE)
+
+        return port_ranges
 
 if __name__ == '__main__':
     try:
@@ -39,7 +98,7 @@ if __name__ == '__main__':
         logger.info('CornerShot starting...')
         args = parse_args()
         cs = CornerShot(args.user, args.password, args.domain, workers=args.threads)
-        cs.add_shots(args.destination, args.target,target_ports=args.tports)
+        cs.add_shots(parse_ip_ranges(args.destination), parse_ip_ranges(args.target),target_ports=parse_port_ranges(args.tports))
         results = cs.open_fire()
         logger.info('Results -------')
         logger.info(results)

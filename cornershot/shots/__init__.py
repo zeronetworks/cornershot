@@ -24,7 +24,7 @@ PORT_UNKNOWN = 'unknown'
 PORT_FILTERED = 'filtered'
 PORT_CLOSED = 'close'
 
-UPPER_TIME_THRESHOLD = 40
+UPPER_TIME_THRESHOLD = 50
 FILTERED_TIME_THRESHOLD = 20
 MIN_TIME_THREASHOLD = 0.5
 
@@ -94,12 +94,13 @@ class BaseRPCShot(object):
             dce.bind(self.iface_uuid, transfer_syntax=self.ts)
             self.dce = dce
         except Exception as err:
-            logger.debug(f'Connection failed to {self.destination}:{self.dest_port}', exc_info=True)
+            logger.debug(f'{type(self).__name__} - Connection failed to {self.destination}:{self.dest_port} - {err}')
 
     def shoot(self):
         err = None
         state = PORT_UNKNOWN
         self.connect_and_bind()
+        elapsed = 0
         if self.dce:
             start = time.time()
             try:
@@ -131,4 +132,7 @@ class BaseRPCShot(object):
                 else:
                     state = PORT_OPEN
 
+        logger.debug(f'{type(self).__name__} - determined {state} for {self.destination}:{self.dest_port} after {elapsed} seconds - with error: {err}')
         return self.destination, self.target, self.trgt_port, state
+
+        logger.debug(f'{type(self).__name__} - failed RPC connection')

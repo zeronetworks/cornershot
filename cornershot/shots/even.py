@@ -14,8 +14,7 @@ class EVENShot(BaseRPCShot):
         BaseRPCShot.__init__(self, username, password, domain, TS, IFACE_UUID, destination, target, dest_port,
                              target_port,
                              state_exception_open=['BAD_NETWORK_NAME', 'NAME_NOT_FOUND', 'ACCESS_DENIED'],
-                             state_exception_closed=['BAD_NETWORK_PATH'],
-                             lower_threshold=FILTERED_PORT_TIMEOUT)
+                             state_exception_closed=['BAD_NETWORK_PATH'])
 
     @staticmethod
     def target_port_range():
