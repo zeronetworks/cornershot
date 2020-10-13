@@ -2,7 +2,7 @@
 In warfare, CornerShot is a weapon that allows a solder to look past a corner (and possibly take a shot), without risking exposure.
 Similarly, the CornerShot package allows one to look at a remote host’s network access without the need to have any special privileges on that host.
 
-Using CornerShot, a **source** host A, with network access to **destination** host B, can determine whether there is network access from B to **target** host C.  
+Using CornerShot, a **source** host A, with network access to **destination** host B, can determine whether there is network access from B to **target** host C, for a specific port **p**.  
 
 <pre>
 +-----+        +-----+    ?    +-----+
@@ -53,7 +53,7 @@ cs.add_shots(destinations=["192.168.1.1"],targets=["192.168.1.2","192.168.1.3"])
 results = cs.open_fire()
 ```
 
-The result of *open_fire* is a dictionary with keys of destinations, each destination has a another set of keys for targets, and finally, each target holds a dictionary of ports and their respective states. 
+The result of *open_fire* is a dictionary with keys of destinations, each destination has another set of keys for targets, and finally, each target holds a dictionary of ports and their respective states. 
 This is an example format of a result: 
 ```javascript
 {'destination_1': 
@@ -99,28 +99,27 @@ To utilize this method, we need a two step approach: first, open a registry key 
 The BaseRegSaveKey method receives a file path to which it can save a backup of a registry, which triggers SMB traffic over port 445 (and 135 as backup) to a target.
 The registry key CornerShot opens is the HKEY_CURRENT_USER, which is open for reading by default on most client hosts.
 ### ElfrOpenBELW
-This function tries to backup Windows events into a file path, which can be remote.
+This function tries to backup Windows events into a file path, which can be remote - in such a case the service will try and access the remote host and path.
 ### EvtRpcOpenLogHandle
 Similarly to the EVEN method, only this method utilizes a different version of the Windows Events protocol, which is done directly over TCP - no need for SMB port to be open.
  
 ## Determining Port State
-CornerShot estimates the remote ports' state based on timing factors and error messages received by the RPC method.
+CornerShot estimates the remote ports' state based on timing factors and error messages received by the RPC method or underlying transport.
 By experimenting with different Windows hosts and various RPC protocols, we came up with 3 different timing thresholds that prove to work in most network environments.
 These thresholds are best illustrated with the following figure:
 <pre>
                 +                           +                 +     
                 |                           |                 |
-  unknown       |       open / closed       |     filtered    |  open
-  /             |                           |                 |
-  open          |                           |                 |
+     unknown    |       open / closed       |     filtered    |  open
+     /          |                           |                 |
+     open       |                           |                 |
                 |                           |                 |
-  +-----+---------------------------+-----------------+--------------+
-  0    0.5                          20                40              Seconds
-
-       MIN                        FILTERED           UPPER  
+  +-------------+------------------+-----------------+--------------+
+  0            0.5                          20                40    Seconds
+               MIN                        FILTERED           UPPER  
 </pre> 
 
-The MIN threashold is 0.5 seconds, responses below this threshold either mean an error in the underlying RPC mechanism or method, or a response could have been received from the target host.
+The MIN threashold is 0.5 seconds, responses below this threshold either mean an error in the underlying RPC method or underlying transport, or a response could have been received from the target host.
 
 Replies below FILTERED threshold of 20 seconds could indicate either an open or a closed port, depending on the type of error message received for the method. 
 
@@ -143,4 +142,5 @@ The following table shows default support for various RPC protocols, given that 
 | Server 2019   | EVEN,EVEN6,RRP,RPRN**     |     445 / 135 & even6 tcp port   |            445                     |
 
 \* If Webclient service is runnig on a client machine, additional ports can be scanned. Currently CornerShot does not support this option.
-\** RPRN protocol is supported on server hosts, however opening a remote web printer does not work - until we find a workaround :wink:  
+
+\** RPRN protocol is supported on server hosts, however opening a remote web printer does not work (which is why we can't scan ANY target port) - until we find a workaround :wink:  
