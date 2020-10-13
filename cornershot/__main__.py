@@ -103,6 +103,7 @@ def parse_port_ranges(ranges):
 
 if __name__ == '__main__':
     try:
+        cs = None
         args = parse_args()
         set_logger(args.verbose)
         logger.info('CornerShot starting...')

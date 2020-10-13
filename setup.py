@@ -15,7 +15,7 @@ with open(path.join(SCRIPT_DIR, 'requirements.txt'), encoding='utf-8') as f:
 setup(
     name='cornershot',
     python_requires='>=3',
-    version='0.0.3',
+    version='0.0.4',
     description='Library to test network connectivity',
     long_description=long_description,
     url='https://github.com/zeronetworks/cornershot',
