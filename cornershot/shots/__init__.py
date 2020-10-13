@@ -94,7 +94,7 @@ class BaseRPCShot(object):
             dce.bind(self.iface_uuid, transfer_syntax=self.ts)
             self.dce = dce
         except Exception as err:
-            logger.debug(f'{type(self).__name__} - Connection failed to {self.destination}:{self.dest_port} - {err}')
+            logger.debug(f'{type(self).__name__} - Connection failed for {self.destination}->{self.target}:{self.trgt_port} - {err}')
 
     def shoot(self):
         err = None
@@ -132,7 +132,8 @@ class BaseRPCShot(object):
                 else:
                     state = PORT_OPEN
 
-        logger.debug(f'{type(self).__name__} - determined {state} for {self.destination}:{self.dest_port} after {elapsed} seconds - with error: {err}')
+        logger.debug(f'{type(self).__name__} - determined {state} for {self.destination}->{self.target}:{self.trgt_port} after {round(elapsed,2)} seconds - with error: {err}')
+        logger.info(f'{type(self).__name__} - {self.destination}->{self.target}:{self.trgt_port} - {state}')
         return self.destination, self.target, self.trgt_port, state
 
         logger.debug(f'{type(self).__name__} - failed RPC connection')

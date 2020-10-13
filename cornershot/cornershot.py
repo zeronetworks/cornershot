@@ -2,7 +2,7 @@ import itertools
 import queue
 import threading
 import time
-
+from random import uniform,shuffle
 
 from .shots import PORT_UNKNOWN
 from .shots.even import EVENShot
@@ -18,7 +18,7 @@ TARGET_PORTS = [135, 445, 3389, 5985, 5986]
 DEFAULT_SHOTS = [EVENShot, RPRNShot, RRPShot, EVEN6Shot]
 
 class CornerShot(object):
-    def __init__(self, username, password, domain, workers=20, shots=None):
+    def __init__(self, username, password, domain, workers=250, shots=None):
 
         logger.debug(f'CS created with username: {username},domain:{domain},workers:{workers}')
         if shots is None:
@@ -96,18 +96,25 @@ class CornerShot(object):
         remaining = MAX_QUEUE_SIZE
         thread_list = []
 
-        for _ in range(self.workers):
+        num_threads = min(self.total_shots,self.workers)
+
+        for _ in range(num_threads):
             w = threading.Thread(target=self._takeashot, daemon=True)
             w.start()
             thread_list.append(w)
 
         while self.runthreads:
             new_tasks = itertools.islice(self.shot_gen, remaining)
+            # tasks = shuffle(list(new_tasks))
+            # if not tasks:
+            #     tasks = []
             tasks = list(new_tasks)
+            shuffle(tasks)
 
             remaining = remaining - len(tasks)
 
             for bt in tasks:
+                time.sleep(uniform(0,0.026))
                 self.bulletQ.put(bt)
 
             while True:
@@ -119,7 +126,6 @@ class CornerShot(object):
                         if result:
                             destination, target, target_port, state = result
                             self._merge_result(destination, target, target_port, state)
-                            logger.info(f"{destination}->{target}:{target_port} - {state}")
                         self.resultQ.task_done()
                         remaining += 1
                         self.total_shots -= 1
@@ -130,6 +136,9 @@ class CornerShot(object):
         self.shot_gen = None
         self.total_shots = 0
 
+        return self.results
+
+    def read_reslts(self):
         return self.results
 
     def _get_suitable_shots(self, target_port, destination_port):

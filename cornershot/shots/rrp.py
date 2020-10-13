@@ -2,7 +2,7 @@ from impacket.dcerpc.v5 import rrp
 
 from . import *
 
-TS = ('71710533-BEBA-4937-8319-B5DBEF9CCC36', '1.0')
+TS = ('8a885d04-1ceb-11c9-9fe8-08002b104860', '2.0')
 IFACE_UUID = rrp.MSRPC_UUID_RRP
 
 

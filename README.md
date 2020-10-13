@@ -49,7 +49,7 @@ Adding destinations, target and ports is achieved via the *add_shots* method. On
 ```python
 from cornershot import CornerShot
 cs = CornerShot("username", "password", "fqdn")
-cs.add_shots(["192.168.1.1"],["192.168.1.2","192.168.1.3"])
+cs.add_shots(destinations=["192.168.1.1"],targets=["192.168.1.2","192.168.1.3"])
 results = cs.open_fire()
 ```
 
@@ -105,36 +105,42 @@ Similarly to the EVEN method, only this method utilizes a different version of t
  
 ## Determining Port State
 CornerShot estimates the remote ports' state based on timing factors and error messages received by the RPC method.
-By experimenting with different Windows hosts and various RPC protocols, we came up with the 3 different timing thresholds that prove to work in most network environments.
+By experimenting with different Windows hosts and various RPC protocols, we came up with 3 different timing thresholds that prove to work in most network environments.
 These thresholds are best illustrated with the following figure:
 <pre>
-unknown         open
-/               /
-open    +       closed              +     filtered    +     open
-        |                           |                 |
-        |                           |                 |
-        |                           |                 |
-        |                           |                 |
-        |                           |                 |
+                +                           +                 +     
+                |                           |                 |
+  unknown       |       open / closed       |     filtered    |  open
+  /             |                           |                 |
+  open          |                           |                 |
+                |                           |                 |
   +-----+---------------------------+-----------------+--------------+
   0    0.5                          20                40              Seconds
 
        MIN                        FILTERED           UPPER  
 </pre> 
 
-The MIN threashold is 0.5 seconds, responses below this threshold either mean an error in the underlying RPC mechanism or method, or a response could have been received from the target host. 
+The MIN threashold is 0.5 seconds, responses below this threshold either mean an error in the underlying RPC mechanism or method, or a response could have been received from the target host.
 
-Replies below FILTERED threshold of 20 seconds could indicate either an open or a closed ports, depending on the type of error message received for the method. 
+Replies below FILTERED threshold of 20 seconds could indicate either an open or a closed port, depending on the type of error message received for the method. 
 
 Replies between the FILTERED and UPPER threshold of 40 seconds indicate a filtered port for all tested methods (so far...). And requests taking more than the UPPER limit indicate a prolonged open TCP connection.
 
 ## OS support
-Executing Corenershot between different OS versions and configurations will yield different results. Not all Windows versions have the same named pipes or behave the same when queried with the same RPC method. 
-Most Windows OOTB will not expose SMB and other RPC services over the network, however, experience has shown that in large environments these ports tesnd to be open and accessible for most of the assets. 
+Executing Corenershot against different OS versions and configurations will yield different results. Not all Windows versions have the same named pipes or behave the same when queried with the same RPC method. 
+Most Windows OOTB will not expose SMB and other RPC services over the network, however, experience has shown that in large environments these ports tend to be open and accessible for most of the assets.
 
-The following table shows default support for various RPC protocols, given that the appropriate ports are accessible to the destination host: 
+The following table shows default support for various RPC protocols, given that the appropriate ports are accessible to the destination host and no configuration changes were made to the host: 
 
-| OS        | Supported RPC Protocols       | Supported Target Ports  |
-| ------------- |:-------------------------:| -----------------------:|
-| Windows 8     | EVEN,EVEN6                |           445           |
-| Windows 10     | EVEN,EVEN6               |           445           |
+| OS            | Supported RPC Protocols   | Required Open Destination Ports  | Possible Destination Ports to Scan | 
+| ------------- |:-------------------------:| --------------------------------:|  ---------------------------------:|
+| Windows 7     | EVEN,EVEN6                |     445 / 135 & even6 tcp port   |            445*                    |
+| Windows 8     | EVEN,EVEN6                |     445 / 135 & even6 tcp port   |            445*                    |
+| Windows 10    | EVEN,EVEN6,RPRN           |     445 / 135 & even6 tcp port   |            **ANY**                 |
+| Server 2008   | EVEN,EVEN6,RRP,RPRN**     |     445 / 135 & even6 tcp port   |            445                     |
+| Server 2012   | EVEN,EVEN6,RRP,RPRN**     |     445 / 135 & even6 tcp port   |            445                     |
+| Server 2016   | EVEN,EVEN6,RRP,RPRN**     |     445 / 135 & even6 tcp port   |            445                     |
+| Server 2019   | EVEN,EVEN6,RRP,RPRN**     |     445 / 135 & even6 tcp port   |            445                     |
+
+\* If Webclient service is runnig on a client machine, additional ports can be scanned. Currently CornerShot does not support this option.
+\** RPRN protocol is supported on server hosts, however opening a remote web printer does not work - until we find a workaround :wink:  

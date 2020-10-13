@@ -11,8 +11,7 @@ class RPRNShot(BaseRPCShot):
 
     def __init__(self, username, password, domain, destination, target, dest_port=None, target_port=None):
         BaseRPCShot.__init__(self, username, password, domain, TS, IFACE_UUID, destination, target, dest_port,
-                             target_port,
-                             state_exception_closed=['INVALID_PRINTER_NAME'])
+                             target_port,state_exception_closed=['INVALID_PRINTER_NAME'])
 
     @staticmethod
     def target_port_range():
