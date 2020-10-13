@@ -131,7 +131,7 @@ Most Windows OOTB will not expose SMB and other RPC services over the network, h
 
 The following table shows default support for various RPC protocols, given that the appropriate ports are accessible to the destination host and no configuration changes were made to the host: 
 
-| OS            | Supported RPC Protocols   | Required Open Destination Ports  | Possible Destination Ports to Scan | 
+| OS            | Supported RPC Protocols   | Required Open Destination Ports  | Possible Target Ports to Scan | 
 | ------------- |:-------------------------:| --------------------------------:|  ---------------------------------:|
 | Windows 7     | EVEN,EVEN6                |     445 / 135 & even6 tcp port   |            445*                    |
 | Windows 8     | EVEN,EVEN6                |     445 / 135 & even6 tcp port   |            445*                    |
