@@ -1,18 +1,17 @@
 # What is CornerShot
-In warfare, CornerShot is a weapon that allows a solder to look past a corner (and possibly take a shot), without risking exposure.
+In warfare, CornerShot is a weapon that allows a soldier to look past a corner (and possibly take a shot), without risking exposure.
 Similarly, the CornerShot package allows one to look at a remote host’s network access without the need to have any special privileges on that host.
 
 Using CornerShot, a **source** host A, with network access to **destination** host B, can determine whether there is network access from B to **target** host C, for a specific port **p**.  
 
-<pre>
+```
 +-----+        +-----+    ?    +-----+
 |     |        |     |         |     |
 |  A  +-------->  B  +------->(p) C  |
 |     |        |     |         |     |
 +-----+        +-----+         +-----+
  source      destination        target
- 
- </pre>
+```
 
 Similarly to [nmap](https://nmap.org/), CornerShot differentiates between the following state of ports: *open*,*closed*, *filtered* and *unknown* (if it can't be determined). 
 
@@ -22,7 +21,7 @@ CornerShot can be used as a package, or as a standalone module. The only require
 ## Installation 
 
 ```bash
-pip install cornershot impacket
+pip install cornershot
 ```
 
 ## Standalone Usage
@@ -74,7 +73,7 @@ This is an example format of a result:
 # How CornerShot Works?
 
 CornerShot relies on various, well documented, standard Remote Procedure Call (RPC) methods that are used by various Microsoft services. 
-By using methods that only require authenticated account in the domain, CornerShot is able to trigger network traffic from a destination host to a target.
+By using methods that only require an authenticated account in the domain, CornerShot is able to trigger network traffic from a destination host to a target.
 
 CornerShot is able to determine the remote's port state by measuring the time an RPC call took, and using different error codes for each RPC method.
 
@@ -107,7 +106,7 @@ Similarly to the EVEN method, only this method utilizes a different version of t
 CornerShot estimates the remote ports' state based on timing factors and error messages received by the RPC method or underlying transport.
 By experimenting with different Windows hosts and various RPC protocols, we came up with 3 different timing thresholds that prove to work in most network environments.
 These thresholds are best illustrated with the following figure:
-<pre>
+```
                 +                           +                 +     
                 |                           |                 |
      unknown    |       open / closed       |     filtered    |  open
@@ -117,9 +116,9 @@ These thresholds are best illustrated with the following figure:
   +-------------+------------------+-----------------+--------------+
   0            0.5                          20                40    Seconds
                MIN                        FILTERED           UPPER  
-</pre> 
+``` 
 
-The MIN threashold is 0.5 seconds, responses below this threshold either mean an error in the underlying RPC method or underlying transport, or a response could have been received from the target host.
+The MIN threshold is 0.5 seconds, responses below this threshold either mean an error in the underlying RPC method or underlying transport, or a response could have been received from the target host.
 
 Replies below FILTERED threshold of 20 seconds could indicate either an open or a closed port, depending on the type of error message received for the method. 
 
@@ -141,6 +140,6 @@ The following table shows default support for various RPC protocols, given that 
 | Server 2016   | EVEN,EVEN6,RRP,RPRN**     |     445 / 135 & even6 tcp port   |            445                     |
 | Server 2019   | EVEN,EVEN6,RRP,RPRN**     |     445 / 135 & even6 tcp port   |            445                     |
 
-\* If Webclient service is runnig on a client machine, additional ports can be scanned. Currently CornerShot does not support this option.
+\* If Webclient service is running on a client machine, additional ports can be scanned. Currently CornerShot does not support this option.
 
 \** RPRN protocol is supported on server hosts, however opening a remote web printer does not work (which is why we can't scan ANY target port) - until we find a workaround :wink:  

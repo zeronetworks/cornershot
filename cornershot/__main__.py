@@ -7,7 +7,7 @@ import logging
 from json import dumps
 
 DEFAULT_NUM_THREADS = 200
-DEFAULT_TARGET_PORTS = [135, 445, 3389, 5985, 5986, 8888]
+DEFAULT_TARGET_PORTS = [135, 445, 3389, 5985, 5986]
 
 INVALID_SUBNET_ERROR_MESSAGE = f"please pick a valid comma delimited list of ip subnet or range such as '192.168.10.0/24,10.9.0.0-10.9.0.255'"
 INVALID_PORTS_ERROR_MESSAGE = f"please pick a valid comma delimited list of port ranges, or list of ports"
