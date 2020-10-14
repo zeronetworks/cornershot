@@ -4,7 +4,7 @@ from os import path
 
 SCRIPT_DIR = path.abspath(path.dirname(__file__))
 
-with open(path.join(SCRIPT_DIR, 'README.rst'), encoding='utf-8') as f:
+with open(path.join(SCRIPT_DIR, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 with open(path.join(SCRIPT_DIR, 'requirements.txt'), encoding='utf-8') as f:
@@ -15,8 +15,9 @@ with open(path.join(SCRIPT_DIR, 'requirements.txt'), encoding='utf-8') as f:
 setup(
     name='cornershot',
     python_requires='>=3',
-    version='0.0.1',
+    version='0.1.0',
     description='Library to test network connectivity',
+    long_description_content_type='text/markdown',
     long_description=long_description,
     url='https://github.com/zeronetworks/cornershot',
     author='Sagie Dulce, Zero Networks',
@@ -35,7 +36,7 @@ setup(
         'Programming Language :: Python :: 3.8',
     ],
     keywords='cornershot zerotrust ztna zeronetworks network scanner networkscanner',
-    packages=['cornershot'],
+    packages=['cornershot', 'cornershot.shots'],
     install_requires=dependencies,
     extras_require={
         'dev': ['check-manifest'],
