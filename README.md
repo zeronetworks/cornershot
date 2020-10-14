@@ -4,15 +4,14 @@ Similarly, the CornerShot package allows one to look at a remote host’s networ
 
 Using CornerShot, a **source** host A, with network access to **destination** host B, can determine whether there is network access from B to **target** host C, for a specific port **p**.  
 
-<pre>
+```
 +-----+        +-----+    ?    +-----+
 |     |        |     |         |     |
 |  A  +-------->  B  +------->(p) C  |
 |     |        |     |         |     |
 +-----+        +-----+         +-----+
  source      destination        target
- 
- </pre>
+```
 
 Similarly to [nmap](https://nmap.org/), CornerShot differentiates between the following state of ports: *open*,*closed*, *filtered* and *unknown* (if it can't be determined). 
 
@@ -22,7 +21,7 @@ CornerShot can be used as a package, or as a standalone module. The only require
 ## Installation 
 
 ```bash
-pip install cornershot impacket
+pip install cornershot
 ```
 
 ## Standalone Usage
@@ -107,7 +106,7 @@ Similarly to the EVEN method, only this method utilizes a different version of t
 CornerShot estimates the remote ports' state based on timing factors and error messages received by the RPC method or underlying transport.
 By experimenting with different Windows hosts and various RPC protocols, we came up with 3 different timing thresholds that prove to work in most network environments.
 These thresholds are best illustrated with the following figure:
-<pre>
+```
                 +                           +                 +     
                 |                           |                 |
      unknown    |       open / closed       |     filtered    |  open
@@ -117,7 +116,7 @@ These thresholds are best illustrated with the following figure:
   +-------------+------------------+-----------------+--------------+
   0            0.5                          20                40    Seconds
                MIN                        FILTERED           UPPER  
-</pre> 
+``` 
 
 The MIN threshold is 0.5 seconds, responses below this threshold either mean an error in the underlying RPC method or underlying transport, or a response could have been received from the target host.
 
