@@ -66,7 +66,6 @@ class CornerShot(object):
         else:
             self.shot_gen = self._shots_generator(destinations, targets, target_ports, destination_ports)
 
-        # TODO maybe use a list
         self.shot_gen, sg_sum = itertools.tee(self.shot_gen)
         self.total_shots = sum(1 for _ in sg_sum)
 
@@ -105,9 +104,6 @@ class CornerShot(object):
 
         while self.runthreads:
             new_tasks = itertools.islice(self.shot_gen, remaining)
-            # tasks = shuffle(list(new_tasks))
-            # if not tasks:
-            #     tasks = []
             tasks = list(new_tasks)
             shuffle(tasks)
 
@@ -138,7 +134,7 @@ class CornerShot(object):
 
         return self.results
 
-    def read_reslts(self):
+    def read_results(self):
         return self.results
 
     def _get_suitable_shots(self, target_port, destination_port):

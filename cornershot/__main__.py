@@ -120,5 +120,5 @@ if __name__ == '__main__':
     finally:
         logger.info('CornerShot finished...')
         if cs:
-            res = cs.read_reslts()
+            res = cs.read_results()
             if res: logger.info(dumps(res,indent=4))
