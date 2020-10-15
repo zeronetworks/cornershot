@@ -97,40 +97,41 @@ class CornerShot(object):
 
         num_threads = min(self.total_shots,self.workers)
 
-        for _ in range(num_threads):
-            w = threading.Thread(target=self._takeashot, daemon=True)
-            w.start()
-            thread_list.append(w)
+        if self.total_shots > 0:
+            for _ in range(num_threads):
+                w = threading.Thread(target=self._takeashot, daemon=True)
+                w.start()
+                thread_list.append(w)
 
-        while self.runthreads:
-            new_tasks = itertools.islice(self.shot_gen, remaining)
-            tasks = list(new_tasks)
-            shuffle(tasks)
+            while self.runthreads:
+                new_tasks = itertools.islice(self.shot_gen, remaining)
+                tasks = list(new_tasks)
+                shuffle(tasks)
 
-            remaining = remaining - len(tasks)
+                remaining = remaining - len(tasks)
 
-            for bt in tasks:
-                time.sleep(uniform(0,0.026))
-                self.bulletQ.put(bt)
+                for bt in tasks:
+                    time.sleep(uniform(0,0.026))
+                    self.bulletQ.put(bt)
 
-            while True:
-                if self.resultQ.empty():
-                    time.sleep(0.3)
-                else:
-                    while not self.resultQ.empty():
-                        result = self.resultQ.get()
-                        if result:
-                            destination, target, target_port, state = result
-                            self._merge_result(destination, target, target_port, state)
-                        self.resultQ.task_done()
-                        remaining += 1
-                        self.total_shots -= 1
-                        if self.total_shots < 1:
-                            self.runthreads = False
-                    break
+                while True:
+                    if self.resultQ.empty():
+                        time.sleep(0.3)
+                    else:
+                        while not self.resultQ.empty():
+                            result = self.resultQ.get()
+                            if result:
+                                destination, target, target_port, state = result
+                                self._merge_result(destination, target, target_port, state)
+                            self.resultQ.task_done()
+                            remaining += 1
+                            self.total_shots -= 1
+                            if self.total_shots < 1:
+                                self.runthreads = False
+                        break
 
-        self.shot_gen = None
-        self.total_shots = 0
+            self.shot_gen = None
+            self.total_shots = 0
 
         return self.results
 
