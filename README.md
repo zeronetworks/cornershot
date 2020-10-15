@@ -31,7 +31,7 @@ Similarly to [nmap](https://nmap.org/), CornerShot differentiates between the fo
 
 The following demo shows running CornerShot against two destinations hosts 172.0.1.12 & 172.0.1.13, in order to determine if the have network access to 192.168.200.1:
 
-![cornershot demo](./demos/csdemo.gif.png)  
+![cornershot demo](./demos/csdemo.gif)  
 
 # Use Cases
 
