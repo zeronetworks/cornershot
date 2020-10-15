@@ -2,18 +2,36 @@
 In warfare, CornerShot is a weapon that allows a soldier to look past a corner (and possibly take a shot), without risking exposure.
 Similarly, the CornerShot package allows one to look at a remote host’s network access without the need to have any special privileges on that host.
 
-Using CornerShot, a **source** host A, with network access to **destination** host B, can determine whether there is network access from B to **target** host C, for a specific port **p**.  
+Using CornerShot, a **source**, with network access to **destination**, can determine whether there is network access between the **destination** and **target** for a specific port **p**.
+
+For example, let's assume an red team is trying to propagate from a "compromised" source host A, to a target host X, for which host A has no access to. 
+If they propagate through host B, only then they will discover that there is not network access between host B and X. 
+
+By using CornerShot, the team can discover that host C actually has access to target X, so propagation towards target X should go through host C first.   
 
 ```
-+-----+        +-----+    ?    +-----+
-|     |        |     |         |     |
-|  A  +-------->  B  +------->(p) C  |
-|     |        |     |         |     |
-+-----+        +-----+         +-----+
++-----+        +-----+          +-----+
+|     |        |     | filtered |     |
+|  A  +-------->  B  +----X--->(p) X  |
+|     |        |     |          |     |
++-----+        +-----+          +-(p)-+
  source      destination        target
+   +                               ^
+   |                               |
+   |           +-----+             |
+   |           |     |   open      |
+   +---------->+  C  +-------------+
+               |     |
+               +-----+
+
+
 ```
 
-Similarly to [nmap](https://nmap.org/), CornerShot differentiates between the following state of ports: *open*,*closed*, *filtered* and *unknown* (if it can't be determined). 
+Similarly to [nmap](https://nmap.org/), CornerShot differentiates between the following state of ports: *open*,*closed*, *filtered* and *unknown* (if it can't be determined).
+
+The following demo shows running CornerShot against two destinations hosts 172.0.1.12 & 172.0.1.13, in order to determine if the have network access to 192.168.200.1:
+
+![cornershot demo](./demos/csdemo.gif.png)  
 
 # Use Cases
 
@@ -155,3 +173,13 @@ The following table shows default support for various RPC protocols, given that 
 \* If Webclient service is running on a client machine, additional ports can be scanned. Currently CornerShot does not support this option.
 
 \** RPRN protocol is supported on server hosts, however opening a remote web printer does not work (which is why we can't scan ANY target port) - until we find a workaround :wink:  
+
+# Developers
+Additional RPC shots, or any other contribution is welcome! 
+
+All RPC methods are implemented under */shots*, and inherit from an abstract class named *BaseRPCShot*. 
+The */example* folder shows how to create a custom RPC shot and use it in code.  
+
+# Contact Us
+We are happy to hear from you! 
+For bugs, patches, suggestions on this package, please contact us at [support@zeronetworks.com](mailto:support@zeronetworks.com)
