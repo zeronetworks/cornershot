@@ -2,18 +2,48 @@
 In warfare, CornerShot is a weapon that allows a soldier to look past a corner (and possibly take a shot), without risking exposure.
 Similarly, the CornerShot package allows one to look at a remote host’s network access without the need to have any special privileges on that host.
 
-Using CornerShot, a **source** host A, with network access to **destination** host B, can determine whether there is network access from B to **target** host C, for a specific port **p**.  
+Using CornerShot, a **source**, with network access to **destination**, can determine whether there is network access between the **destination** and **target** for a specific port **p**.
+
+For example, let's assume an red team is trying to propagate from a "compromised" source host A, to a target host X, for which host A has no access to. 
+If they propagate through host B, only then they will discover that there is not network access between host B and X. 
+
+By using CornerShot, the team can discover that host C actually has access to target X, so propagation towards target X should go through host C first.   
 
 ```
-+-----+        +-----+    ?    +-----+
-|     |        |     |         |     |
-|  A  +-------->  B  +------->(p) C  |
-|     |        |     |         |     |
-+-----+        +-----+         +-----+
++-----+        +-----+          +-----+
+|     |        |     | filtered |     |
+|  A  +-------->  B  +----X--->(p) X  |
+|     |        |     |          |     |
++-----+        +-----+          +-(p)-+
  source      destination        target
+   +                               ^
+   |                               |
+   |           +-----+             |
+   |           |     |   open      |
+   +---------->+  C  +-------------+
+               |     |
+               +-----+
+
+
 ```
 
-Similarly to [nmap](https://nmap.org/), CornerShot differentiates between the following state of ports: *open*,*closed*, *filtered* and *unknown* (if it can't be determined). 
+Similarly to [nmap](https://nmap.org/), CornerShot differentiates between the following state of ports: *open*,*closed*, *filtered* and *unknown* (if it can't be determined).
+
+The following demo shows running CornerShot against two destinations hosts 172.0.1.12 & 172.0.1.13, in order to determine if the have network access to 192.168.200.1:
+
+![cornershot demo](./demos/csdemo.gif)  
+
+# Use Cases
+
+## Single Deployment for Complete Network Visibility
+The seemingly simple task of identifying if some host B in the network has access to host C may require large deployment of network sensors, device agents or collection of a multitude of firewall rules, router configurations and host policies. 
+
+CornerShot can simplify this process by using one (or very few) agents that can query other hosts in the network, to determine their access to remote hosts.  
+  
+## Validate BloodHound Paths
+Security teams that utilize BloodHound to find, and mitigate, privilege escalation paths inside their network, often struggle with millions of logical paths discovered by BloodHound.
+
+[ShotHound](https://github.com/zeronetworks/BloodHound-Tools/tree/main/ShotHound) is a tool that integrated CornerShot with BloodHound, in order to discover practical paths that are supported by network access. 
 
 # Use Cases
 
@@ -155,3 +185,16 @@ The following table shows default support for various RPC protocols, given that 
 \* If Webclient service is running on a client machine, additional ports can be scanned. Currently CornerShot does not support this option.
 
 \** RPRN protocol is supported on server hosts, however opening a remote web printer does not work (which is why we can't scan ANY target port) - until we find a workaround :wink:  
+
+# Developers
+Additional RPC shots, or any other contribution is welcome! 
+
+All RPC methods are implemented under */shots*, and inherit from an abstract class named *BaseRPCShot*. 
+The */example* folder shows how to create a custom RPC shot and use it in code.  
+
+# License
+CornerShot is released under the Apache 2.0 license. For more details see [LICENSE](https://github.com/zeronetworks/cornershot/blob/expansion_doc/LICENSE.txt).
+
+# Contact Us
+We are happy to hear from you! 
+For bugs, patches, suggestions on this package, please contact us at [support@zeronetworks.com](mailto:support@zeronetworks.com)
