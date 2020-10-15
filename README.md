@@ -180,6 +180,9 @@ Additional RPC shots, or any other contribution is welcome!
 All RPC methods are implemented under */shots*, and inherit from an abstract class named *BaseRPCShot*. 
 The */example* folder shows how to create a custom RPC shot and use it in code.  
 
+# License
+CornerShot is released under the Apache 2.0 license. For more details see [LICENSE](https://github.com/zeronetworks/cornershot/blob/expansion_doc/LICENSE.txt).
+
 # Contact Us
 We are happy to hear from you! 
 For bugs, patches, suggestions on this package, please contact us at [support@zeronetworks.com](mailto:support@zeronetworks.com)
