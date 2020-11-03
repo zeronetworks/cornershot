@@ -45,18 +45,6 @@ Security teams that utilize BloodHound to find, and mitigate, privilege escalati
 
 [ShotHound](https://github.com/zeronetworks/BloodHound-Tools/tree/main/ShotHound) is a tool that integrated CornerShot with BloodHound, in order to discover practical paths that are supported by network access. 
 
-# Use Cases
-
-## Single Deployment for Complete Network Visibility
-The seemingly simple task of identifying if some host B in the network has access to host C may require large deployment of network sensors, device agents or collection of a multitude of firewall rules, router configurations and host policies. 
-
-CornerShot can simplify this process by using one (or very few) agents that can query other hosts in the network, to determine their access to remote hosts.  
-  
-## Validate BloodHound Paths
-Security teams that utilize BloodHound to find, and mitigate, privilege escalation paths inside their network, often struggle with millions of logical paths discovered by BloodHound.
-
-[ShotHound](https://github.com/zeronetworks/BloodHound-Tools/tree/main/ShotHound) is a tool that integrated CornerShot with BloodHound, in order to discover practical paths that are supported by network access. 
-
 # Getting Started
 CornerShot can be used as a package, or as a standalone module. The only requirements are Python 3 and the impacket package.
 
