@@ -4,7 +4,7 @@ import threading
 import time
 from random import uniform,shuffle
 
-from .shots import PORT_UNKNOWN
+from .shots import PORT_UNKNOWN,PORT_FILTERED
 from .shots.even import EVENShot
 from .shots.even6 import EVEN6Shot
 from .shots.rprn import RPRNShot
@@ -86,8 +86,12 @@ class CornerShot(object):
             self.results[dest][target][tport] = state
         elif PORT_UNKNOWN in self.results[dest][target][tport]:
             self.results[dest][target][tport] = state
-        elif PORT_UNKNOWN in state:
+        elif PORT_FILTERED in self.results[dest][target][tport]:
             pass
+        elif PORT_FILTERED in state:
+            self.results[dest][target][tport] = state
+        elif PORT_UNKNOWN in state:
+            passpy
         elif state not in self.results[dest][target][tport]:
             self.results[dest][target][tport] += "|" + state
 
