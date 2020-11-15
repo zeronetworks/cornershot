@@ -91,7 +91,7 @@ class CornerShot(object):
         elif PORT_FILTERED in state:
             self.results[dest][target][tport] = state
         elif PORT_UNKNOWN in state:
-            passpy
+            pass
         elif state not in self.results[dest][target][tport]:
             self.results[dest][target][tport] += "|" + state
 
