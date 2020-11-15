@@ -149,4 +149,3 @@ class CornerShot(object):
 
         return class_list
 
-
