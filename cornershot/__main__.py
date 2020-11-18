@@ -20,7 +20,7 @@ def parse_args():
     parser.add_argument("user", help="provide any authenticated user in the domain", type=str)
     parser.add_argument("password", help="domain password", type=str)
     parser.add_argument("domain", help="the FQDN of the domain.", type=str)
-    parser.add_argument("destination", help="destination for cornershot", type=str)
+    parser.add_argument("carrier", help="carrier host for cornershot", type=str)
     parser.add_argument("target", help="target for shot", type=str)
     parser.add_argument("-tp", "--tports", dest='tports', default=DEFAULT_TARGET_PORTS, help="comma delimited list of target port ranges to scan for", type=str)
     parser.add_argument("-w", "--workerthreads", dest='threads', help="number of threads to perform shots", default=DEFAULT_NUM_THREADS, type=int)
@@ -109,7 +109,7 @@ if __name__ == '__main__':
         logger.info('CornerShot starting...')
 
         cs = CornerShot(args.user, args.password, args.domain, workers=args.threads)
-        cs.add_shots(parse_ip_ranges(args.destination), parse_ip_ranges(args.target), target_ports=parse_port_ranges(args.tports))
+        cs.add_shots(parse_ip_ranges(args.carrier), parse_ip_ranges(args.target), target_ports=parse_port_ranges(args.tports))
         cs.open_fire()
 
     except KeyboardInterrupt:

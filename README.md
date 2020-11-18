@@ -2,7 +2,7 @@
 In warfare, CornerShot is a weapon that allows a soldier to look past a corner (and possibly take a shot), without risking exposure.
 Similarly, the CornerShot package allows one to look at a remote host’s network access without the need to have any special privileges on that host.
 
-Using CornerShot, a **source**, with network access to **destination**, can determine whether there is network access between the **destination** and **target** for a specific port **p**.
+Using CornerShot, a **source**, with network access to **carrier**, can determine whether there is network access between the **carrier** and **target** for a specific port **p**.
 
 For example, let's assume an red team is trying to propagate from a "compromised" source host A, to a target host X, for which host A has no access to. 
 If they propagate through host B, only then they will discover that there is not network access between host B and X. 
@@ -15,7 +15,7 @@ By using CornerShot, the team can discover that host C actually has access to ta
 |  A  +-------->  B  +----X--->(p) X  |
 |     |        |     |          |     |
 +-----+        +-----+          +-(p)-+
- source      destination        target
+ source      carrier        target
    +                               ^
    |                               |
    |           +-----+             |
@@ -29,7 +29,7 @@ By using CornerShot, the team can discover that host C actually has access to ta
 
 Similarly to [nmap](https://nmap.org/), CornerShot differentiates between the following state of ports: *open*,*closed*, *filtered* and *unknown* (if it can't be determined).
 
-The following demo shows running CornerShot against two destinations hosts 172.0.1.12 & 172.0.1.13, in order to determine if the have network access to 192.168.200.1:
+The following demo shows running CornerShot against two carriers hosts 172.0.1.12 & 172.0.1.13, in order to determine if the have network access to 192.168.200.1:
 
 ![cornershot demo](./demos/csdemo.gif)  
 
@@ -56,42 +56,42 @@ pip install cornershot
 
 ## Standalone Usage
 
-Basic usage requires credentials from a valid domain user, a FQDN domain, a destination IP and target IP.
+Basic usage requires credentials from a valid domain user, a FQDN domain, a carrier IP and target IP.
 ```bash
-python -m cornershot <user> <password> <domain> <destination> <target>
+python -m cornershot <user> <password> <domain> <carrier> <target>
 ```
 
-To scan a range of destinations against a range of targets, subnets or IP ranges may be used in a comma delimited list:
+To scan a range of carriers against a range of targets, subnets or IP ranges may be used in a comma delimited list:
 ```bash
 python -m cornershot <user> <password> <domain> 192.168.1.10-192.168.1.20 192.168.5.0/24,192.168.6.0/24
 ```
 
 By default, CornerShot will try to scan the following ports: 135, 445, 3389, 5985, 5986. The user can provide a comma delimited list of ports and port ranges:
 ```bash
-python -m cornershot -tp 22,8080,45000-45005 <user> <password> <domain> <destination> <target>
+python -m cornershot -tp 22,8080,45000-45005 <user> <password> <domain> <carrier> <target>
 ```  
 
 ## As a Package
 Within code, one needs to instantiate a CornerShot object with the username, password and domain name of a valid domain user. 
-Adding destinations, target and ports is achieved via the *add_shots* method. Once ready, the *open_fire* method can be called, which performs only the relevant RPC calls based on the required ports.  
+Adding carriers, target and ports is achieved via the *add_shots* method. Once ready, the *open_fire* method can be called, which performs only the relevant RPC calls based on the required ports.  
 
 ```python
 from cornershot import CornerShot
 cs = CornerShot("username", "password", "fqdn")
-cs.add_shots(destinations=["192.168.1.1"],targets=["192.168.1.2","192.168.1.3"])
+cs.add_shots(carriers=["192.168.1.1"],targets=["192.168.1.2","192.168.1.3"])
 results = cs.open_fire()
 ```
 
-The result of *open_fire* is a dictionary with keys of destinations, each destination has another set of keys for targets, and finally, each target holds a dictionary of ports and their respective states. 
+The result of *open_fire* is a dictionary with keys of carriers, each carrier has another set of keys for targets, and finally, each target holds a dictionary of ports and their respective states. 
 This is an example format of a result: 
 ```javascript
-{'destination_1': 
+{'carrier_1': 
 	{'target_1': 
 		{135: 'unknown', 445: 'filtered', 3389: 'filtered', 5986: 'filtered', 5985: 'filtered'},
 	'target_2': 
 		{135: 'unknown', 445: 'open', 5985: 'unknown', 5986: 'filtered', 3389: 'open'}
 	}, 
-'destination_2': 
+'carrier_2': 
 	{'target_1': 
 		{3389: 'filtered', 135: 'filtered', 5985: 'filtered', 445: 'filtered', 5986: 'unknown'}, 
 	'target_2': 
@@ -103,7 +103,7 @@ This is an example format of a result:
 # How CornerShot Works?
 
 CornerShot relies on various, well documented, standard Remote Procedure Call (RPC) methods that are used by various Microsoft services. 
-By using methods that only require an authenticated account in the domain, CornerShot is able to trigger network traffic from a destination host to a target.
+By using methods that only require an authenticated account in the domain, CornerShot is able to trigger network traffic from a carrier host to a target.
 
 CornerShot is able to determine the remote's port state by measuring the time an RPC call took, and using different error codes for each RPC method.
 
@@ -158,9 +158,9 @@ Replies between the FILTERED and UPPER threshold of 40 seconds indicate a filter
 Executing Corenershot against different OS versions and configurations will yield different results. Not all Windows versions have the same named pipes or behave the same when queried with the same RPC method. 
 Most Windows OOTB will not expose SMB and other RPC services over the network, however, experience has shown that in large environments these ports tend to be open and accessible for most of the assets.
 
-The following table shows default support for various RPC protocols, given that the appropriate ports are accessible to the destination host and no configuration changes were made to the host: 
+The following table shows default support for various RPC protocols, given that the appropriate ports are accessible to the carrier host and no configuration changes were made to the host: 
 
-| OS            | Supported RPC Protocols   | Required Open Destination Ports  | Possible Target Ports to Scan | 
+| OS            | Supported RPC Protocols   | Required Open Carrier Ports  | Possible Target Ports to Scan | 
 | ------------- |:-------------------------:| --------------------------------:|  ---------------------------------:|
 | Windows 7     | EVEN,EVEN6                |     445 / 135 & even6 tcp port   |            445*                    |
 | Windows 8     | EVEN,EVEN6                |     445 / 135 & even6 tcp port   |            445*                    |
