@@ -33,6 +33,8 @@ The following demo shows running CornerShot against two carriers hosts 172.0.1.1
 
 ![cornershot demo](./demos/csdemo.gif)  
 
+Read more [here](https://zeronetworks.com/blog/adversary-resilience-via-least-privilege-networking-part-1/).
+
 # Use Cases
 
 ## Single Deployment for Complete Network Visibility
