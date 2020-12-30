@@ -12,7 +12,7 @@ class EVEN6Shot(BaseRPCShot):
     def __init__(self, username, password, domain, destination, target, dest_port=None, target_port=None):
         BaseRPCShot.__init__(self, username, password, domain, TS, IFACE_UUID, destination, target, dest_port,
                              target_port, auth_level=RPC_C_AUTHN_LEVEL_PKT_PRIVACY,
-                             state_exception_closed=["BAD_NETPATH"], state_exception_open=['rpc_s_access_denied','ERROR_FILE_NOT_FOUND'])
+                             state_exception_closed=["BAD_NETPATH"], state_exception_open=['ERROR_FILE_NOT_FOUND'])
 
     @staticmethod
     def target_port_range():
