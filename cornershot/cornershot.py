@@ -95,52 +95,57 @@ class CornerShot(object):
         elif state not in self.results[dest][target][tport]:
             self.results[dest][target][tport] += "|" + state
 
-    def open_fire(self):
+    def _shots_manager(self):
         remaining = MAX_QUEUE_SIZE
-        thread_list = []
+        while self.runthreads:
+            new_tasks = itertools.islice(self.shot_gen, remaining)
+            tasks = list(new_tasks)
+            shuffle(tasks)
 
+            remaining = remaining - len(tasks)
+
+            for bt in tasks:
+                time.sleep(uniform(0, 0.026))
+                self.bulletQ.put(bt)
+
+            while True:
+                if self.resultQ.empty():
+                    time.sleep(0.3)
+                else:
+                    while not self.resultQ.empty():
+                        result = self.resultQ.get()
+                        if result:
+                            destination, target, target_port, state = result
+                            self._merge_result(destination, target, target_port, state)
+                        self.resultQ.task_done()
+                        remaining += 1
+                        self.total_shots -= 1
+                        if self.total_shots < 1:
+                            self.runthreads = False
+                    break
+
+        self.shot_gen = None
+        self.total_shots = 0
+
+    def open_fire(self,blocking=True):
         num_threads = min(self.total_shots,self.workers)
 
         if self.total_shots > 0:
             for _ in range(num_threads):
                 w = threading.Thread(target=self._takeashot, daemon=True)
                 w.start()
-                thread_list.append(w)
-
-            while self.runthreads:
-                new_tasks = itertools.islice(self.shot_gen, remaining)
-                tasks = list(new_tasks)
-                shuffle(tasks)
-
-                remaining = remaining - len(tasks)
-
-                for bt in tasks:
-                    time.sleep(uniform(0,0.026))
-                    self.bulletQ.put(bt)
-
-                while True:
-                    if self.resultQ.empty():
-                        time.sleep(0.3)
-                    else:
-                        while not self.resultQ.empty():
-                            result = self.resultQ.get()
-                            if result:
-                                destination, target, target_port, state = result
-                                self._merge_result(destination, target, target_port, state)
-                            self.resultQ.task_done()
-                            remaining += 1
-                            self.total_shots -= 1
-                            if self.total_shots < 1:
-                                self.runthreads = False
-                        break
-
-            self.shot_gen = None
-            self.total_shots = 0
-
-        return self.results
+        if blocking:
+            self._shots_manager()
+            return self.results
+        else:
+            main_thread = threading.Thread(target=self._shots_manager,daemon=True)
+            main_thread.start()
 
     def read_results(self):
         return self.results
+
+    def remaining_shots(self):
+        return self.total_shots
 
     def _get_suitable_shots(self, target_port, destination_port):
         class_list = []
