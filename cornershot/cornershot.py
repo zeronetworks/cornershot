@@ -66,9 +66,6 @@ class CornerShot(object):
         else:
             self.shot_gen = self._shots_generator(destinations, targets, target_ports, destination_ports)
 
-        self.shot_gen, sg_sum = itertools.tee(self.shot_gen)
-        self.total_shots = sum(1 for _ in sg_sum)
-
     def _shots_generator(self, destinations, targets, target_ports, destination_ports=None):
         for destination in destinations:
             for target in targets:
@@ -140,6 +137,10 @@ class CornerShot(object):
         else:
             main_thread = threading.Thread(target=self._shots_manager,daemon=True)
             main_thread.start()
+
+    def lock_and_load(self):
+        self.shot_gen, sg_sum = itertools.tee(self.shot_gen)
+        self.total_shots = sum(1 for _ in sg_sum)
 
     def read_results(self):
         return self.results
