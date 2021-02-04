@@ -136,6 +136,7 @@ class CornerShot(object):
         self.total_shots = 0
 
     def open_fire(self,blocking=True):
+        self.lock_and_load()
         num_threads = min(self.total_shots,self.workers)
 
         if self.total_shots > 0:
@@ -153,10 +154,10 @@ class CornerShot(object):
         return self.results
 
     def lock_and_load(self):
-        self.total_shots = self.remaining_shots()
+        self.total_shots = len(self.shot_list)
 
     def remaining_shots(self):
-        return len(self.shot_list)
+        return self.total_shots
 
     def _get_suitable_shots(self, target_port, destination_port):
         class_list = []
