@@ -17,7 +17,7 @@ TARGET_PORTS = [135, 445, 3389, 5985, 5986]
 DEFAULT_SHOTS = [EVENShot, RPRNShot, RRPShot, EVEN6Shot]
 
 class CornerShot(object):
-    def __init__(self, username, password, domain, workers=250, shots=None):
+    def __init__(self, username, password, domain, skip_scanned=False, workers=250, shots=None):
 
         logger.debug(f'CS created with username: {username},domain:{domain},workers:{workers}')
         if shots is None:
@@ -34,6 +34,8 @@ class CornerShot(object):
         self.results = {}
         self.shot_list = []
         self.total_shots = 0
+        self.skip_scanned = skip_scanned
+        self.already_scanned = []
 
     def _takeashot(self):
         while self.runthreads:
@@ -86,6 +88,11 @@ class CornerShot(object):
                         self.shot_list.append(cls(self.username, self.password, self.domain, destination, target,target_port=target_port))
 
     def _merge_result(self, dest, target, tport, state):
+        if self.skip_scanned and PORT_UNKNOWN not in state:
+            tp_pair = target + ":" + str(tport)
+            if tp_pair not in self.already_scanned:
+                self.already_scanned.append(tp_pair)
+
         if dest not in self.results:
             self.results[dest] = {}
         if target not in self.results[dest]:
@@ -103,11 +110,36 @@ class CornerShot(object):
         elif state not in self.results[dest][target][tport]:
             self.results[dest][target][tport] += "|" + state
 
+    def _get_next_tasks(self,remaining):
+
+        new_tasks = []
+        remaining = min(len(self.shot_list),remaining)
+        if self.skip_scanned:
+            iterated_shots = 0
+            for bullet in self.shot_list:
+                if remaining > 0:
+                    trgt = bullet.target + ":" + str(bullet.trgt_port)
+                    if trgt not in self.already_scanned:
+                        new_tasks.append(bullet)
+                    iterated_shots += 1
+                    remaining -= 1
+                else:
+                    break
+            self.shot_list = self.shot_list[iterated_shots + 1:]
+
+        else:
+            new_tasks = self.shot_list[0:remaining]
+            self.shot_list = self.shot_list[remaining + 1:]
+
+        return new_tasks
+
+
     def _shots_manager(self):
         remaining = MAX_QUEUE_SIZE
         while self.runthreads:
-            new_tasks = self.shot_list[0:remaining]
-            self.shot_list = self.shot_list[remaining + 1:]
+            new_tasks = self._get_next_tasks(remaining)
+            # new_tasks = self.shot_list[0:remaining]
+            # self.shot_list = self.shot_list[remaining + 1:]
             tasks = new_tasks
             shuffle(tasks)
 
