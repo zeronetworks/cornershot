@@ -51,7 +51,6 @@ class CornerShot(object):
                     except Exception:
                         logger.debug(f'Unexpected exception during shot', exc_info=True)
                     finally:
-                        logger.info("Putting bullter to result queue...")
                         self.bulletQ.task_done()
                         self.resultQ.put(res)
                 logger.debug(f'Bullet is none!')
