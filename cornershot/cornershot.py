@@ -11,13 +11,13 @@ from .shots.rrp import RRPShot
 
 from . import logger
 
-MAX_QUEUE_SIZE = 1000
+MAX_QUEUE_SIZE = 3000
 TARGET_PORTS = [135, 445, 3389, 5985, 5986]
 
 DEFAULT_SHOTS = [EVENShot, RPRNShot, RRPShot, EVEN6Shot]
 
 class CornerShot(object):
-    def __init__(self, username, password, domain, skip_scanned=False, workers=250, shots=None):
+    def __init__(self, username, password, domain, workers=250, shots=None):
 
         logger.debug(f'CS created with username: {username},domain:{domain},workers:{workers}')
         if shots is None:
@@ -34,7 +34,8 @@ class CornerShot(object):
         self.results = {}
         self.shot_list = []
         self.total_shots = 0
-        self.skip_scanned = skip_scanned
+        self.current_tasks = []
+        self.skip_scanned = False
         self.already_scanned = []
 
     def _takeashot(self):
@@ -50,10 +51,12 @@ class CornerShot(object):
                     except Exception:
                         logger.debug(f'Unexpected exception during shot', exc_info=True)
                     finally:
+                        logger.info("Putting bullter to result queue...")
                         self.bulletQ.task_done()
                         self.resultQ.put(res)
+                logger.debug(f'Bullet is none!')
             except (queue.Empty,TimeoutError):
-                pass
+                logger.debug(f'Exception during bullet load', exc_info=True)
             except Exception:
                 logger.debug(f'Unexpected exception during bullet load', exc_info=True)
 
@@ -121,14 +124,16 @@ class CornerShot(object):
                     trgt = bullet.target + ":" + str(bullet.trgt_port)
                     if trgt not in self.already_scanned:
                         new_tasks.append(bullet)
+                    else:
+                        self.total_shots -= 1
                     iterated_shots += 1
                     remaining -= 1
                 else:
                     break
-            self.shot_list = self.shot_list[iterated_shots + 1:]
+            self.shot_list = self.shot_list[iterated_shots:]
 
         else:
-            new_tasks = self.shot_list[0:remaining]
+            new_tasks = self.shot_list[0:remaining ]
             self.shot_list = self.shot_list[remaining + 1:]
 
         return new_tasks
@@ -136,16 +141,15 @@ class CornerShot(object):
 
     def _shots_manager(self):
         remaining = MAX_QUEUE_SIZE
+        self.total_shots = len(self.shot_list)
         while self.runthreads:
-            new_tasks = self._get_next_tasks(remaining)
-            # new_tasks = self.shot_list[0:remaining]
-            # self.shot_list = self.shot_list[remaining + 1:]
-            tasks = new_tasks
-            shuffle(tasks)
+            self.current_tasks = self._get_next_tasks(remaining)
 
-            remaining = remaining - len(tasks)
+            shuffle(self.current_tasks)
 
-            for bt in tasks:
+            remaining = remaining - len(self.current_tasks)
+
+            for bt in self.current_tasks:
                 time.sleep(uniform(0, 0.026))
                 self.bulletQ.put(bt)
 
@@ -167,8 +171,9 @@ class CornerShot(object):
 
         self.total_shots = 0
 
-    def open_fire(self,blocking=True):
-        self.lock_and_load()
+    def open_fire(self,blocking=True,skip_scanned=False):
+        self.skip_scanned = skip_scanned
+
         num_threads = min(self.total_shots,self.workers)
 
         if self.total_shots > 0:
@@ -184,9 +189,6 @@ class CornerShot(object):
 
     def read_results(self):
         return self.results
-
-    def lock_and_load(self):
-        self.total_shots = len(self.shot_list)
 
     def remaining_shots(self):
         return self.total_shots

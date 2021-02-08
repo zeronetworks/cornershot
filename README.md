@@ -81,7 +81,6 @@ Adding carriers, target and ports is achieved via the *add_shots* method. Once r
 from cornershot import CornerShot
 cs = CornerShot("username", "password", "fqdn")
 cs.add_shots(carriers=["192.168.1.1"],targets=["192.168.1.2","192.168.1.3"])
-cs.lock_and_load()
 results = cs.open_fire()
 ```
 

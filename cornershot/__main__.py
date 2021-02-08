@@ -110,7 +110,6 @@ if __name__ == '__main__':
 
         cs = CornerShot(args.user, args.password, args.domain, workers=args.threads)
         cs.add_shots(parse_ip_ranges(args.carrier), parse_ip_ranges(args.target), target_ports=parse_port_ranges(args.tports))
-        cs.lock_and_load()
         cs.open_fire()
 
     except KeyboardInterrupt:
