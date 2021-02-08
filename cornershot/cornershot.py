@@ -83,6 +83,8 @@ class CornerShot(object):
                 for cls in tport_shot_class_pair[1]:
                     self.shot_list.append(cls(self.username, self.password, self.domain, carrier, target,target_port=target_port))
 
+        self.total_shots += len(self.shot_list)
+
     def _shots_generator(self, destinations, targets, target_ports, destination_ports=None):
         for destination in destinations:
             for target in targets:
