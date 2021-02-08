@@ -126,6 +126,7 @@ class CornerShot(object):
                     if trgt not in self.already_scanned:
                         new_tasks.append(bullet)
                     else:
+                        logger.debug(f"Skipping {trgt}, already scanned...")
                         self.total_shots -= 1
                     iterated_shots += 1
                     remaining -= 1
