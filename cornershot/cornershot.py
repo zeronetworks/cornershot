@@ -126,7 +126,7 @@ class CornerShot(object):
                     if trgt not in self.already_scanned:
                         new_tasks.append(bullet)
                     else:
-                        logger.debug(f"Skipping {trgt}, already scanned...")
+                        logger.info(f"Skipping {trgt}, already scanned...")
                         self.total_shots -= 1
                     iterated_shots += 1
                     remaining -= 1
@@ -152,23 +152,20 @@ class CornerShot(object):
             remaining = remaining - len(self.current_tasks)
 
             for bt in self.current_tasks:
-                time.sleep(uniform(0, 0.026))
                 self.bulletQ.put(bt)
 
             while True:
-                if self.resultQ.empty():
-                    time.sleep(0.3)
-                else:
-                    while not self.resultQ.empty():
-                        result = self.resultQ.get()
-                        if result:
-                            destination, target, target_port, state = result
-                            self._merge_result(destination, target, target_port, state)
-                        self.resultQ.task_done()
-                        remaining += 1
-                        self.total_shots -= 1
-                        if self.total_shots < 1:
-                            self.runthreads = False
+                try:
+                    result = self.resultQ.get(timeout=5)
+                    if result:
+                        destination, target, target_port, state = result
+                        self._merge_result(destination, target, target_port, state)
+                    self.resultQ.task_done()
+                    remaining += 1
+                    self.total_shots -= 1
+                    if self.total_shots < 1:
+                        self.runthreads = False
+                except (TimeoutError,queue.Empty):
                     break
 
         self.total_shots = 0
