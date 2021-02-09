@@ -11,7 +11,7 @@ from .shots.rrp import RRPShot
 
 from . import logger
 
-MAX_QUEUE_SIZE = 3000
+MAX_QUEUE_SIZE = 5000
 TARGET_PORTS = [135, 445, 3389, 5985, 5986]
 
 DEFAULT_SHOTS = [EVENShot, RPRNShot, RRPShot, EVEN6Shot]
