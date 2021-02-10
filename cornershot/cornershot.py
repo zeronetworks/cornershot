@@ -94,9 +94,8 @@ class CornerShot(object):
 
     def _merge_result(self, dest, target, tport, state):
         if self.skip_scanned and PORT_OPEN in state:
-            tp_pair = target + ":" + str(tport)
-            if tp_pair not in self.already_scanned:
-                self.already_scanned.append(tp_pair)
+            if target not in self.already_scanned:
+                self.already_scanned.append(target)
 
         if dest not in self.results:
             self.results[dest] = {}
@@ -123,11 +122,10 @@ class CornerShot(object):
             iterated_shots = 0
             for bullet in self.shot_list:
                 if remaining > 0:
-                    trgt = bullet.target + ":" + str(bullet.trgt_port)
-                    if trgt not in self.already_scanned:
+                    if bullet.target not in self.already_scanned:
                         new_tasks.append(bullet)
                     else:
-                        logger.info(f"Skipping {trgt}, already scanned...")
+                        logger.info(f"Skipping {bullet.target}, already scanned...")
                         self.total_shots -= 1
                     iterated_shots += 1
                     remaining -= 1
