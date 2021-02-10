@@ -100,12 +100,12 @@ class BaseRPCShot(object):
     async def shoot(self):
         err = None
         state = PORT_UNKNOWN
-        await self.connect_and_bind()
+        self.connect_and_bind()
         elapsed = 0
         if self.dce:
             start = time.time()
             try:
-                await self.do_rpc_logic()
+                self.do_rpc_logic()
             except DCERPCException as e:
                 err = e
             except Exception as e:
