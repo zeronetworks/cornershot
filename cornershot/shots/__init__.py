@@ -81,7 +81,7 @@ class BaseRPCShot(object):
         except Exception as err:
             pass
 
-    async def connect_and_bind(self):
+    def connect_and_bind(self):
         try:
             rpctransport = transport.DCERPCTransportFactory(self.do_binding())
             if hasattr(rpctransport, 'set_credentials'):
@@ -97,7 +97,7 @@ class BaseRPCShot(object):
         except Exception as err:
             logger.debug(f'{type(self).__name__} - Connection failed for {self.destination}->{self.target}:{self.trgt_port} - {err}')
 
-    async def shoot(self):
+    def shoot(self):
         err = None
         state = PORT_UNKNOWN
         self.connect_and_bind()
