@@ -3,7 +3,7 @@ import threading
 import time
 from random import uniform,shuffle
 
-from .shots import PORT_UNKNOWN,PORT_FILTERED
+from .shots import PORT_UNKNOWN,PORT_FILTERED,PORT_OPEN
 from .shots.even import EVENShot
 from .shots.even6 import EVEN6Shot
 from .shots.rprn import RPRNShot
@@ -37,6 +37,7 @@ class CornerShot(object):
         self.current_tasks = []
         self.skip_scanned = False
         self.already_scanned = []
+        self.batch_scanned_event = None
 
     def _takeashot(self):
         while self.runthreads:
@@ -92,7 +93,7 @@ class CornerShot(object):
                         self.shot_list.append(cls(self.username, self.password, self.domain, destination, target,target_port=target_port))
 
     def _merge_result(self, dest, target, tport, state):
-        if self.skip_scanned and PORT_UNKNOWN not in state:
+        if self.skip_scanned and PORT_OPEN in state:
             tp_pair = target + ":" + str(tport)
             if tp_pair not in self.already_scanned:
                 self.already_scanned.append(tp_pair)
@@ -140,14 +141,13 @@ class CornerShot(object):
 
         return new_tasks
 
-
     def _shots_manager(self):
-        remaining = MAX_QUEUE_SIZE
+        remaining = min(self.workers,MAX_QUEUE_SIZE)
+        shuffle(self.shot_list)
         self.total_shots = len(self.shot_list)
+
         while self.runthreads:
             self.current_tasks = self._get_next_tasks(remaining)
-
-            shuffle(self.current_tasks)
 
             remaining = remaining - len(self.current_tasks)
 
@@ -163,28 +163,34 @@ class CornerShot(object):
                     self.resultQ.task_done()
                     remaining += 1
                     self.total_shots -= 1
+                    if self.total_shots % 500 == 0:
+                        self.batch_scanned_event.set()
                     if self.total_shots < 1:
                         self.runthreads = False
                 except (TimeoutError,queue.Empty):
                     break
 
         self.total_shots = 0
+        self.batch_scanned_event.set()
 
     def open_fire(self,blocking=True,skip_scanned=False):
         self.skip_scanned = skip_scanned
 
-        num_threads = min(self.total_shots,self.workers)
+        self.workers = min(self.total_shots,self.workers)
 
         if self.total_shots > 0:
-            for _ in range(num_threads):
+            for _ in range(self.workers):
                 w = threading.Thread(target=self._takeashot, daemon=True)
                 w.start()
+
         if blocking:
             self._shots_manager()
             return self.results
         else:
             main_thread = threading.Thread(target=self._shots_manager,daemon=True)
             main_thread.start()
+            self.batch_scanned_event = threading.Event()
+            return self.batch_scanned_event
 
     def read_results(self):
         return self.results

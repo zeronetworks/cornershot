@@ -1,4 +1,5 @@
 import time
+import asyncio
 from abc import ABCMeta, abstractmethod
 
 from impacket.dcerpc.v5 import transport
@@ -80,7 +81,7 @@ class BaseRPCShot(object):
         except Exception as err:
             pass
 
-    def connect_and_bind(self):
+    async def connect_and_bind(self):
         try:
             rpctransport = transport.DCERPCTransportFactory(self.do_binding())
             if hasattr(rpctransport, 'set_credentials'):
@@ -96,15 +97,15 @@ class BaseRPCShot(object):
         except Exception as err:
             logger.debug(f'{type(self).__name__} - Connection failed for {self.destination}->{self.target}:{self.trgt_port} - {err}')
 
-    def shoot(self):
+    async def shoot(self):
         err = None
         state = PORT_UNKNOWN
-        self.connect_and_bind()
+        await self.connect_and_bind()
         elapsed = 0
         if self.dce:
             start = time.time()
             try:
-                self.do_rpc_logic()
+                await self.do_rpc_logic()
             except DCERPCException as e:
                 err = e
             except Exception as e:
