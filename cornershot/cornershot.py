@@ -173,6 +173,7 @@ class CornerShot(object):
 
     def open_fire(self,blocking=True,skip_scanned=False):
         self.skip_scanned = skip_scanned
+        self.total_shots = len(self.shot_list)
 
         self.workers = min(self.total_shots,self.workers)
 
