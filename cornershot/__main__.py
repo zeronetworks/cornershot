@@ -4,10 +4,11 @@ from ipaddress import ip_network, AddressValueError, NetmaskValueError, summariz
 from .cornershot import CornerShot
 from . import logger
 import logging
-from json import dumps
+from json import dump, dumps
 
 DEFAULT_NUM_THREADS = 200
 DEFAULT_TARGET_PORTS = [135, 445, 3389, 5985, 5986]
+OUTPUT_FILE_NAME = 'cornershot.json'
 
 INVALID_SUBNET_ERROR_MESSAGE = f"please pick a valid comma delimited list of ip subnet or range such as '192.168.10.0/24,10.9.0.0-10.9.0.255'"
 INVALID_PORTS_ERROR_MESSAGE = f"please pick a valid comma delimited list of port ranges, or list of ports"
@@ -25,6 +26,7 @@ def parse_args():
     parser.add_argument("-tp", "--tports", dest='tports', default=DEFAULT_TARGET_PORTS, help="comma delimited list of target port ranges to scan for", type=str)
     parser.add_argument("-w", "--workerthreads", dest='threads', help="number of threads to perform shots", default=DEFAULT_NUM_THREADS, type=int)
     parser.add_argument('-v', dest='verbose', action='store_true', help='enable verbose logging')
+    parser.add_argument('-f', '--file', dest='output_to_file', action='store_true', help='write output to file')
 
     args = parser.parse_args()
 
@@ -101,6 +103,12 @@ def parse_port_ranges(ranges):
     return port_ranges
 
 
+def write_output_to_file(results, filename=OUTPUT_FILE_NAME):
+    with open(filename, 'w', encoding='utf-8') as f:
+        dump(results, f, ensure_ascii=False, indent=4)
+    logger.info(f'Written output to {filename}')
+
+
 if __name__ == '__main__':
     try:
         cs = None
@@ -121,4 +129,8 @@ if __name__ == '__main__':
         logger.info('CornerShot finished...')
         if cs:
             res = cs.read_results()
-            if res: logger.info(dumps(res,indent=4))
+            if res:
+                if args.output_to_file:
+                    write_output_to_file(res)
+                else:
+                    logger.info(dumps(res,indent=4))

@@ -161,7 +161,7 @@ class CornerShot(object):
                     self.resultQ.task_done()
                     remaining += 1
                     self.total_shots -= 1
-                    if self.total_shots % 500 == 0:
+                    if self.total_shots % 500 == 0 and self.batch_scanned_event is not None:  # skip if blocking == True
                         self.batch_scanned_event.set()
                     if self.total_shots < 1:
                         self.runthreads = False
@@ -169,7 +169,7 @@ class CornerShot(object):
                     break
 
         self.total_shots = 0
-        self.batch_scanned_event.set()
+        self.batch_scanned_event.set() if self.batch_scanned_event is not None else None  # skip if blocking == True
 
     def open_fire(self,blocking=True,skip_scanned=False):
         self.skip_scanned = skip_scanned
