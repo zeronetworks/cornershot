@@ -135,7 +135,7 @@ class CornerShot(object):
 
         else:
             new_tasks = self.shot_list[0:remaining ]
-            self.shot_list = self.shot_list[remaining + 1:]
+            self.shot_list = self.shot_list[remaining:]
 
         return new_tasks
 
