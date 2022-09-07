@@ -1,3 +1,7 @@
+[![Build](https://github.com/zeronetworks/cornershot/actions/workflows/build.yml/badge.svg)](https://github.com/zeronetworks/cornershot/actions/workflows/build.yml)
+[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/zeronetworks/cornershot)](https://github.com/zeronetworks/cornershot/releases/latest)
+![GitHub all releases](https://img.shields.io/github/downloads/zeronetworks/cornershot/total)
+
 # What is CornerShot
 In warfare, CornerShot is a weapon that allows a soldier to look past a corner (and possibly take a shot), without risking exposure.
 Similarly, the CornerShot package allows one to look at a remote host’s network access without the need to have any special privileges on that host.
