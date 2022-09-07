@@ -1,4 +1,3 @@
-[![Build](https://github.com/zeronetworks/cornershot/actions/workflows/build.yml/badge.svg)](https://github.com/zeronetworks/cornershot/actions/workflows/build.yml)
 [![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/zeronetworks/cornershot)](https://github.com/zeronetworks/cornershot/releases/latest)
 ![GitHub all releases](https://img.shields.io/github/downloads/zeronetworks/cornershot/total)
 
